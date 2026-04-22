@@ -44,6 +44,32 @@ function parseFrontmatterValue(raw: string): Record<string, string> {
   return result;
 }
 
+function parseListField(raw: string | undefined): string[] | undefined {
+  if (raw === undefined) {
+    return undefined;
+  }
+
+  const values = raw
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+
+  return values.length > 0 ? values : undefined;
+}
+
+function parseNumberField(raw: string | undefined, fieldName: string, filePath: string): number | undefined {
+  if (raw === undefined || raw.length === 0) {
+    return undefined;
+  }
+
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed)) {
+    throw new Error(`Invalid ${fieldName} in: ${path.basename(filePath)}`);
+  }
+
+  return parsed;
+}
+
 function readSkillFile(filePath: string): SkillFileDefinition {
   const raw = fs.readFileSync(filePath, 'utf8');
   const { frontmatter, body } = parseFrontmatterAndBody(raw);
@@ -53,7 +79,7 @@ function readSkillFile(filePath: string): SkillFileDefinition {
     throw new Error(`Invalid skill file shape: ${path.basename(filePath)}`);
   }
 
-  const { name, description, usage } = meta;
+  const { name, description, usage, aliases, tags, triggers, examples, routePriority } = meta;
   const promptTemplate = body.trim();
   if (typeof name !== 'string' || name.trim().length === 0) {
     throw new Error(`Missing skill name in: ${path.basename(filePath)}`);
@@ -67,11 +93,31 @@ function readSkillFile(filePath: string): SkillFileDefinition {
   if (usage !== undefined && typeof usage !== 'string') {
     throw new Error(`Invalid skill usage in: ${path.basename(filePath)}`);
   }
+  if (aliases !== undefined && typeof aliases !== 'string') {
+    throw new Error(`Invalid skill aliases in: ${path.basename(filePath)}`);
+  }
+  if (tags !== undefined && typeof tags !== 'string') {
+    throw new Error(`Invalid skill tags in: ${path.basename(filePath)}`);
+  }
+  if (triggers !== undefined && typeof triggers !== 'string') {
+    throw new Error(`Invalid skill triggers in: ${path.basename(filePath)}`);
+  }
+  if (examples !== undefined && typeof examples !== 'string') {
+    throw new Error(`Invalid skill examples in: ${path.basename(filePath)}`);
+  }
+  if (routePriority !== undefined && typeof routePriority !== 'string') {
+    throw new Error(`Invalid skill routePriority in: ${path.basename(filePath)}`);
+  }
 
   return {
     name: name.trim(),
     description: description.trim(),
     usage: typeof usage === 'string' && usage.trim().length > 0 ? usage.trim() : undefined,
+    aliases: parseListField(typeof aliases === 'string' ? aliases : undefined),
+    tags: parseListField(typeof tags === 'string' ? tags : undefined),
+    triggers: parseListField(typeof triggers === 'string' ? triggers : undefined),
+    examples: parseListField(typeof examples === 'string' ? examples : undefined),
+    routePriority: parseNumberField(typeof routePriority === 'string' ? routePriority : undefined, 'routePriority', filePath),
     promptTemplate,
   };
 }

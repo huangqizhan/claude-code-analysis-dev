@@ -1,5 +1,5 @@
 import type { CommandHandler } from './types.js';
-import { listSkills, buildSkillPrompt } from '../skills/index.js';
+import { listSkills, buildSkillPrompt, evaluateSkillRouting, formatSkillRouteAnalysis } from '../skills/index.js';
 
 /**
  * Built-in slash commands
@@ -10,7 +10,7 @@ export const builtins: Record<string, CommandHandler> = {
    */
   help: () => ({
     kind: 'append_assistant',
-    text: 'Commands: /help, /clear, /exit, /skills, /skill <name> [args...]. Tools: file_read, grep. Model: qwen3.5-plus. q exits on empty input.',
+    text: 'Commands: /help, /clear, /exit, /skills, /skills route <text>, /skill <name> [args...]. Tools: file_read, grep. Model: qwen3.5-plus. q exits on empty input.',
   }),
 
   /**
@@ -30,12 +30,43 @@ export const builtins: Record<string, CommandHandler> = {
   /**
    * /skills - list available skills
    */
-  skills: () => ({
-    kind: 'append_assistant',
-    text: listSkills()
-      .map((skill) => `/${skill.name} [${skill.source}] - ${skill.description}${skill.usage ? ` (${skill.usage})` : ''}`)
-      .join('\n') || 'No skills available.',
-  }),
+  skills: (_ctx, args) => {
+    if (args[0] === 'route') {
+      const input = args.slice(1).join(' ').trim();
+      if (!input) {
+        return {
+          kind: 'append_assistant',
+          text: 'Usage: /skills route <text>',
+        };
+      }
+
+      return {
+        kind: 'append_assistant',
+        text: formatSkillRouteAnalysis(evaluateSkillRouting(input)),
+      };
+    }
+
+    return {
+      kind: 'append_assistant',
+      text: listSkills()
+        .map((skill) => {
+          const metadataParts: string[] = [];
+          if (skill.aliases?.length) {
+            metadataParts.push(`aliases=${skill.aliases.join(', ')}`);
+          }
+          if (skill.tags?.length) {
+            metadataParts.push(`tags=${skill.tags.join(', ')}`);
+          }
+          if (skill.routePriority !== undefined) {
+            metadataParts.push(`priority=${skill.routePriority}`);
+          }
+
+          const metadata = metadataParts.length > 0 ? ` (${metadataParts.join('; ')})` : '';
+          return `/${skill.name} [${skill.source}] - ${skill.description}${skill.usage ? ` (${skill.usage})` : ''}${metadata}`;
+        })
+        .join('\n') || 'No skills available.',
+    };
+  },
 
   /**
    * /skill <name> [args...] - build a prompt from a skill

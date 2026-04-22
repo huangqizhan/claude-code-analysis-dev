@@ -50,6 +50,11 @@ describe('skill loader', () => {
         'name: alpha',
         'description: Alpha skill',
         'usage: /skill alpha',
+        'aliases: first, starter',
+        'tags: testing, routing',
+        'triggers: write tests, explain alpha',
+        'examples: Alpha example, Another alpha example',
+        'routePriority: 7',
         '---',
         '',
         'Alpha {{args}}',
@@ -78,6 +83,11 @@ describe('skill loader', () => {
     const skills = loadFileSkillDefinitions(tempDir);
     assert.strictEqual(skills.length, 2);
     assert.deepStrictEqual(skills.map((skill) => skill.name), ['alpha', 'beta']);
+    assert.deepStrictEqual(skills[0].aliases, ['first', 'starter']);
+    assert.deepStrictEqual(skills[0].tags, ['testing', 'routing']);
+    assert.deepStrictEqual(skills[0].triggers, ['write tests', 'explain alpha']);
+    assert.deepStrictEqual(skills[0].examples, ['Alpha example', 'Another alpha example']);
+    assert.strictEqual(skills[0].routePriority, 7);
   });
 
   it('rejects duplicate skill names', async () => {

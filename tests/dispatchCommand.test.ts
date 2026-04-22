@@ -17,6 +17,7 @@ describe('dispatchCommand', () => {
     if (result.kind === 'append_assistant') {
       assert.ok(result.text.toLowerCase().includes('command'), 'should mention commands');
       assert.ok(result.text.includes('/skills'), 'should mention skills command');
+      assert.ok(result.text.includes('/skills route <text>'), 'should mention skills route command');
     }
   });
 
@@ -36,6 +37,24 @@ describe('dispatchCommand', () => {
     if (result.kind === 'append_assistant') {
       assert.ok(result.text.includes('[builtin]'), 'should label builtin skills');
       assert.ok(result.text.includes('[file]'), 'should label file skills');
+      assert.ok(result.text.includes('aliases='), 'should show routing metadata');
+    }
+  });
+
+  it('dry-runs routing with /skills route', () => {
+    const result = dispatchCommand('/skills route Write tests for this module', ctx);
+    assert.strictEqual(result.kind, 'append_assistant');
+    if (result.kind === 'append_assistant') {
+      assert.ok(result.text.includes('Selected: /write-tests'), 'should include selected skill');
+      assert.ok(result.text.includes('Top candidates:'), 'should include candidate summary');
+    }
+  });
+
+  it('shows usage for /skills route without text', () => {
+    const result = dispatchCommand('/skills route', ctx);
+    assert.strictEqual(result.kind, 'append_assistant');
+    if (result.kind === 'append_assistant') {
+      assert.ok(result.text.includes('Usage: /skills route <text>'), 'should show usage');
     }
   });
 

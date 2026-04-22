@@ -1,5 +1,5 @@
 export { listSkills, buildSkillPrompt } from './registry.js';
 export { loadFileSkillDefinitions } from './loader.js';
 export { renderSkillTemplate } from './template.js';
-export { routeInputToSkillPrompt } from './router.js';
-export type { SkillDefinition, SkillFileDefinition, SkillSource } from './types.js';
+export { evaluateSkillRouting, formatSkillRouteAnalysis, routeInputToSkillPrompt } from './router.js';
+export type { SkillDefinition, SkillFileDefinition, SkillSource, SkillRouteCandidate, SkillRouteDecision } from './types.js';

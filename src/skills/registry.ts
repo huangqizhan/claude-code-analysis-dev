@@ -8,6 +8,11 @@ const builtinSkills: SkillDefinition[] = [
     description: 'Explain a file or symbol in concise terms',
     usage: '/skill explain-code <path or topic>',
     source: 'builtin',
+    aliases: ['explain', 'explain-this', 'what-does-this-do'],
+    tags: ['analysis', 'reading'],
+    triggers: ['explain this code', 'what does this do', 'how does this work'],
+    examples: ['explain render(<App />);'],
+    routePriority: 5,
     buildPrompt: (args) => {
       const target = args.join(' ').trim();
       return target
@@ -20,6 +25,11 @@ const builtinSkills: SkillDefinition[] = [
     description: 'Turn a task into test cases',
     usage: '/skill write-tests <feature or file>',
     source: 'builtin',
+    aliases: ['tests', 'spec'],
+    tags: ['testing'],
+    triggers: ['write tests', 'generate tests', 'test this module'],
+    examples: ['Write tests for this module'],
+    routePriority: 4,
     buildPrompt: (args) => {
       const target = args.join(' ').trim();
       return target
@@ -32,6 +42,11 @@ const builtinSkills: SkillDefinition[] = [
     description: 'Draft a small refactor plan',
     usage: '/skill refactor-plan <scope>',
     source: 'builtin',
+    aliases: ['refactor', 'cleanup'],
+    tags: ['refactor', 'cleanup'],
+    triggers: ['refactor this code', 'cleanup this code', 'simplify this code'],
+    examples: ['Refactor this code'],
+    routePriority: 3,
     buildPrompt: (args) => {
       const target = args.join(' ').trim();
       return target
@@ -43,9 +58,7 @@ const builtinSkills: SkillDefinition[] = [
 
 function toFileSkill(definition: SkillFileDefinition): SkillDefinition {
   return {
-    name: definition.name,
-    description: definition.description,
-    usage: definition.usage,
+    ...definition,
     source: 'file',
     buildPrompt: (args) => renderSkillTemplate(definition.promptTemplate, args) || `Use ${definition.name} skill.`,
   };

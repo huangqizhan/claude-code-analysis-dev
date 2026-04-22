@@ -3,7 +3,7 @@ import { Box, Text, render, useApp, useInput } from 'ink';
 import { getDefaultLogPath, logDebug } from './log.js';
 import { DEFAULT_MODEL, submitMessage, type ChatMessage } from './query.js';
 import { dispatchCommand, type CommandContext } from './commands/index.js';
-import { routeInputToSkillPrompt } from './skills/index.js';
+import { evaluateSkillRouting, formatSkillRouteAnalysis } from './skills/index.js';
 
 const SYSTEM_PROMPT =
   'You are a concise coding assistant in a terminal CLI. Give short, practical answers.';
@@ -93,9 +93,10 @@ function App(): React.JSX.Element {
       return;
     }
 
-    const routedPrompt = routeInputToSkillPrompt(trimmed);
-    if (routedPrompt) {
-      await streamPrompt(routedPrompt);
+    const routeDecision = evaluateSkillRouting(trimmed);
+    logDebug(formatSkillRouteAnalysis(routeDecision));
+    if (routeDecision.routed && routeDecision.prompt) {
+      await streamPrompt(routeDecision.prompt);
       return;
     }
 
