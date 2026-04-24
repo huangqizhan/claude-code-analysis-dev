@@ -2,7 +2,7 @@ import type { CommandContext } from '../commands/index.js';
 import { dispatchCommand } from '../commands/index.js';
 import { createSession, createOrLoadCurrentSession, appendMessages, type SessionHistory } from '../history/index.js';
 import { logDebug } from '../log.js';
-import { submitMessage, type ChatMessage } from '../query.js';
+import { submitMessage, type ChatMessage, type TurnEvent } from '../query.js';
 import { evaluateSkillRouting, formatSkillRouteAnalysis } from '../skills/index.js';
 import { createAppStateStore } from '../state/AppStateStore.js';
 import type { AppStateStore } from '../state/AppStateStore.js';
@@ -120,6 +120,13 @@ export class QueryEngine {
     this.store.hydrateSession(freshSession);
   }
 
+  private handleTurnEvent(event: TurnEvent): void {
+    if (event.kind === 'turn_error') {
+      const errorMessage = event.error instanceof Error ? event.error.message : String(event.error);
+      this.store.setLastError(errorMessage);
+    }
+  }
+
   private async appendAssistantReply(userText: string, assistantText: string): Promise<void> {
     const state = this.store.getSnapshot();
     const userMessage: ChatMessage = { role: 'user', text: userText };
@@ -147,7 +154,7 @@ export class QueryEngine {
     this.store.setLastError(null);
 
     try {
-      for await (const deltaText of this.submitMessageFn(historyForQuery)) {
+      for await (const deltaText of this.submitMessageFn(historyForQuery, { emit: (event) => this.handleTurnEvent(event) })) {
         assistantText += deltaText;
         this.store.setMessages([...historyForQuery, { role: 'assistant', text: assistantText }]);
       }
