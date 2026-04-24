@@ -1,13 +1,10 @@
-// Test: skill router
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
 import { evaluateSkillRouting, formatSkillRouteAnalysis, routeInputToSkillPrompt } from '../src/skills/router.js';
 
 describe('routeInputToSkillPrompt', () => {
   it('routes explain-like input to the explain skill prompt', () => {
     const prompt = routeInputToSkillPrompt('explain render(<App />);');
-    console.log("------")
-    console.log(prompt)
     assert.ok(prompt?.includes('Explain this code clearly and concisely'), 'should use explain skill prompt');
   });
 

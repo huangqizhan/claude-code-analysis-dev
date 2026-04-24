@@ -54,7 +54,7 @@ export async function* submitMessage(
   // Resolve auth with new priority: options > env > config
   const { apiKey, authToken } = resolveAuth(
     { apiKey: options?.apiKey, authToken: options?.authToken },
-    runtimeConfig
+    runtimeConfig,
   );
   const baseURL = normalizeCredential(options?.baseURL ?? runtimeConfig.anthropicBaseUrl);
   const model = options?.model ?? runtimeConfig.model ?? DEFAULT_MODEL;
