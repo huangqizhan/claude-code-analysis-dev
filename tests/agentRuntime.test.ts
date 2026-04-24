@@ -19,4 +19,5 @@ describe('agent runtime', () => {
     assert.strictEqual(result.output, 'summarize code: src/index.tsx');
     assert.strictEqual(result.done, true);
   });
+
 });

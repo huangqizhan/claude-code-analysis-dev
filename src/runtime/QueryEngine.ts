@@ -27,7 +27,8 @@ export type QueryRuntime = {
 function persistTurn(session: SessionHistory, messages: ChatMessage[], rootDir?: string): SessionHistory | null {
   return appendMessages(session.meta.id, messages, { rootDir });
 }
-
+//从 QueryEngineDeps 这个对象类型里，移除 store 字段。也就是拿到一个“不包含 store”的 deps 类型
+// 然后用一个对象类型 & { store?: AppStateStore } 来表示“可以包含 store”的 deps 类型
 export function createQueryRuntime(deps: Omit<QueryEngineDeps, 'store'> & { store?: AppStateStore }): QueryRuntime {
   const initialSession = createOrLoadCurrentSession({
     rootDir: deps.rootDir,
