@@ -9,7 +9,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function parseFrontmatterAndBody(source: string): { frontmatter: string; body: string } {
-  const match = source.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  const match = source.match(/^(?:\uFEFF)?---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!match) {
     throw new Error('Missing frontmatter.');
   }
