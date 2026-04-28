@@ -96,7 +96,8 @@ export async function* submitMessage(history: ChatMessage[], options?: SubmitMes
     (options?.mcpToolSources ? await createToolRegistryFromSources(options.mcpToolSources) : createDefaultToolRegistry());
   const runtimeConfig = readRuntimeConfig(options?.configPath);
   const { apiKey, authToken } = resolveAuth({ apiKey: options?.apiKey, authToken: options?.authToken }, runtimeConfig);
-  const baseURL = normalizeCredential(options?.baseURL);
+  const baseURL = normalizeCredential(options?.baseURL) ?? runtimeConfig.anthropicBaseUrl;
+  const model = options?.model ?? runtimeConfig.model ?? DEFAULT_MODEL;
 
   if (!apiKey && !authToken) {
     throw new Error('Missing auth credentials. Set MINI_CLAUDE_AUTH_TOKEN env var or anthropicAuthToken in config.');
@@ -175,7 +176,7 @@ export async function* submitMessage(history: ChatMessage[], options?: SubmitMes
 
   yield* runTurnLoop({
     history,
-    model: options?.model ?? DEFAULT_MODEL,
+    model,
     maxTokens: options?.maxTokens ?? 2048,
     baseURL,
     maxToolLoops: options?.maxToolLoops ?? DEFAULT_MAX_TOOL_LOOPS,

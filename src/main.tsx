@@ -2,6 +2,7 @@ import React, { useMemo, useSyncExternalStore } from 'react';
 import { Box, Text, render, useApp, useInput } from 'ink';
 import { getDefaultLogPath, logDebug } from './log.js';
 import { DEFAULT_MODEL } from './query.js';
+import { readRuntimeConfig } from './querylib/auth.js';
 import { dispatchCommand } from './commands/index.js';
 import { evaluateSkillRouting, formatSkillRouteAnalysis } from './skills/index.js';
 import { createQueryRuntime } from './runtime/QueryEngine.js';
@@ -18,6 +19,7 @@ const INITIAL_MESSAGES: ChatMessage[] = [
 
 function App(): React.JSX.Element {
   const { exit } = useApp();
+  const configuredModel = useMemo(() => readRuntimeConfig().model ?? null, []);
   const runtime = useMemo( () =>
       createQueryRuntime({
         exit,
@@ -75,7 +77,7 @@ function App(): React.JSX.Element {
       <Text bold color="cyan">
         mini-claude-cli (V10 history persistence)
       </Text>
-      <Text dimColor>Model: {DEFAULT_MODEL}</Text>
+      <Text dimColor>Model: {configuredModel ?? DEFAULT_MODEL}</Text>
       <Text dimColor>Session: {state.session.meta.id}</Text>
       <Text dimColor>Log (UI + LLM): {getDefaultLogPath()}</Text>
       <Text dimColor>
